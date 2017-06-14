@@ -12,7 +12,7 @@ public class MainGenerator {
         SortOutHelperDBUtil.generateSortOutHelperDB(schema);
         schema.setDefaultJavaPackageDao("cn.luo.sortout.model.dao");
         try {
-            String dirPath = "src";
+            String dirPath = "generated";
             new DaoGenerator().generateAll(schema, dirPath);
         } catch (Exception e) {
             e.printStackTrace();
