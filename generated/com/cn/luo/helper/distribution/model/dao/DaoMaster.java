@@ -1,4 +1,4 @@
-package cn.luo.sortout.model.dao;
+package com.cn.luo.helper.distribution.model.dao;
 
 import android.content.Context;
 import android.database.sqlite.SQLiteDatabase;

@@ -1,4 +1,4 @@
-package cn.luo.sortout.model.entity;
+package com.cn.luo.helper.distribution.model.entity;
 
 import org.greenrobot.greendao.annotation.*;
 
