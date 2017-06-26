@@ -15,8 +15,7 @@ import org.greenrobot.greendao.query.Query;
 import org.greenrobot.greendao.query.QueryBuilder;
 
 import com.cn.luo.helper.distribution.model.entity.Category;
-import com.cn.luo.helper.distribution.model.entity.FolderAndSuffix;
-import com.cn.luo.helper.distribution.model.entity.PlanAndSuffix;
+import com.cn.luo.helper.distribution.model.entity.Folder;
 
 import com.cn.luo.helper.distribution.model.entity.Suffix;
 
@@ -35,13 +34,13 @@ public class SuffixDao extends AbstractDao<Suffix, Long> {
     public static class Properties {
         public final static Property Id = new Property(0, Long.class, "id", true, "id");
         public final static Property Name = new Property(1, String.class, "name", false, "name");
-        public final static Property CategoryId = new Property(2, Long.class, "categoryId", false, "category_id");
+        public final static Property FolderId = new Property(2, Long.class, "folderId", false, "folder_id");
+        public final static Property CategoryId = new Property(3, Long.class, "categoryId", false, "category_id");
     }
 
     private DaoSession daoSession;
 
     private Query<Suffix> folder_SuffixListQuery;
-    private Query<Suffix> plan_SuffixListQuery;
     private Query<Suffix> category_SuffixListQuery;
 
     public SuffixDao(DaoConfig config) {
@@ -59,7 +58,8 @@ public class SuffixDao extends AbstractDao<Suffix, Long> {
         db.execSQL("CREATE TABLE " + constraint + "\"suffix\" (" + //
                 "\"id\" INTEGER PRIMARY KEY ," + // 0: id
                 "\"name\" TEXT NOT NULL UNIQUE ," + // 1: name
-                "\"category_id\" INTEGER);"); // 2: categoryId
+                "\"folder_id\" INTEGER," + // 2: folderId
+                "\"category_id\" INTEGER);"); // 3: categoryId
     }
 
     /** Drops the underlying database table. */
@@ -78,9 +78,14 @@ public class SuffixDao extends AbstractDao<Suffix, Long> {
         }
         stmt.bindString(2, entity.getName());
  
+        Long folderId = entity.getFolderId();
+        if (folderId != null) {
+            stmt.bindLong(3, folderId);
+        }
+ 
         Long categoryId = entity.getCategoryId();
         if (categoryId != null) {
-            stmt.bindLong(3, categoryId);
+            stmt.bindLong(4, categoryId);
         }
     }
 
@@ -94,9 +99,14 @@ public class SuffixDao extends AbstractDao<Suffix, Long> {
         }
         stmt.bindString(2, entity.getName());
  
+        Long folderId = entity.getFolderId();
+        if (folderId != null) {
+            stmt.bindLong(3, folderId);
+        }
+ 
         Long categoryId = entity.getCategoryId();
         if (categoryId != null) {
-            stmt.bindLong(3, categoryId);
+            stmt.bindLong(4, categoryId);
         }
     }
 
@@ -116,7 +126,8 @@ public class SuffixDao extends AbstractDao<Suffix, Long> {
         Suffix entity = new Suffix( //
             cursor.isNull(offset + 0) ? null : cursor.getLong(offset + 0), // id
             cursor.getString(offset + 1), // name
-            cursor.isNull(offset + 2) ? null : cursor.getLong(offset + 2) // categoryId
+            cursor.isNull(offset + 2) ? null : cursor.getLong(offset + 2), // folderId
+            cursor.isNull(offset + 3) ? null : cursor.getLong(offset + 3) // categoryId
         );
         return entity;
     }
@@ -125,7 +136,8 @@ public class SuffixDao extends AbstractDao<Suffix, Long> {
     public void readEntity(Cursor cursor, Suffix entity, int offset) {
         entity.setId(cursor.isNull(offset + 0) ? null : cursor.getLong(offset + 0));
         entity.setName(cursor.getString(offset + 1));
-        entity.setCategoryId(cursor.isNull(offset + 2) ? null : cursor.getLong(offset + 2));
+        entity.setFolderId(cursor.isNull(offset + 2) ? null : cursor.getLong(offset + 2));
+        entity.setCategoryId(cursor.isNull(offset + 3) ? null : cursor.getLong(offset + 3));
      }
     
     @Override
@@ -154,32 +166,16 @@ public class SuffixDao extends AbstractDao<Suffix, Long> {
     }
     
     /** Internal query to resolve the "suffixList" to-many relationship of Folder. */
-    public List<Suffix> _queryFolder_SuffixList(long folderId) {
+    public List<Suffix> _queryFolder_SuffixList(Long folderId) {
         synchronized (this) {
             if (folder_SuffixListQuery == null) {
                 QueryBuilder<Suffix> queryBuilder = queryBuilder();
-                queryBuilder.join(FolderAndSuffix.class, FolderAndSuffixDao.Properties.SuffixId)
-                    .where(FolderAndSuffixDao.Properties.FolderId.eq(folderId));
+                queryBuilder.where(Properties.FolderId.eq(null));
                 folder_SuffixListQuery = queryBuilder.build();
             }
         }
         Query<Suffix> query = folder_SuffixListQuery.forCurrentThread();
         query.setParameter(0, folderId);
-        return query.list();
-    }
-
-    /** Internal query to resolve the "suffixList" to-many relationship of Plan. */
-    public List<Suffix> _queryPlan_SuffixList(long planId) {
-        synchronized (this) {
-            if (plan_SuffixListQuery == null) {
-                QueryBuilder<Suffix> queryBuilder = queryBuilder();
-                queryBuilder.join(PlanAndSuffix.class, PlanAndSuffixDao.Properties.SuffixId)
-                    .where(PlanAndSuffixDao.Properties.PlanId.eq(planId));
-                plan_SuffixListQuery = queryBuilder.build();
-            }
-        }
-        Query<Suffix> query = plan_SuffixListQuery.forCurrentThread();
-        query.setParameter(0, planId);
         return query.list();
     }
 
@@ -204,9 +200,12 @@ public class SuffixDao extends AbstractDao<Suffix, Long> {
             StringBuilder builder = new StringBuilder("SELECT ");
             SqlUtils.appendColumns(builder, "T", getAllColumns());
             builder.append(',');
-            SqlUtils.appendColumns(builder, "T0", daoSession.getCategoryDao().getAllColumns());
+            SqlUtils.appendColumns(builder, "T0", daoSession.getFolderDao().getAllColumns());
+            builder.append(',');
+            SqlUtils.appendColumns(builder, "T1", daoSession.getCategoryDao().getAllColumns());
             builder.append(" FROM suffix T");
-            builder.append(" LEFT JOIN category T0 ON T.\"category_id\"=T0.\"id\"");
+            builder.append(" LEFT JOIN folder T0 ON T.\"folder_id\"=T0.\"id\"");
+            builder.append(" LEFT JOIN category T1 ON T.\"category_id\"=T1.\"id\"");
             builder.append(' ');
             selectDeep = builder.toString();
         }
@@ -216,6 +215,10 @@ public class SuffixDao extends AbstractDao<Suffix, Long> {
     protected Suffix loadCurrentDeep(Cursor cursor, boolean lock) {
         Suffix entity = loadCurrent(cursor, 0, lock);
         int offset = getAllColumns().length;
+
+        Folder folder = loadCurrentOther(daoSession.getFolderDao(), cursor, offset);
+        entity.setFolder(folder);
+        offset += daoSession.getFolderDao().getAllColumns().length;
 
         Category category = loadCurrentOther(daoSession.getCategoryDao(), cursor, offset);
         entity.setCategory(category);

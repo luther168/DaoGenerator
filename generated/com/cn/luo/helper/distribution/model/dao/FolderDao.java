@@ -1,19 +1,20 @@
 package com.cn.luo.helper.distribution.model.dao;
 
 import java.util.List;
+import java.util.ArrayList;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteStatement;
 
 import org.greenrobot.greendao.AbstractDao;
 import org.greenrobot.greendao.Property;
+import org.greenrobot.greendao.internal.SqlUtils;
 import org.greenrobot.greendao.internal.DaoConfig;
 import org.greenrobot.greendao.database.Database;
 import org.greenrobot.greendao.database.DatabaseStatement;
 import org.greenrobot.greendao.query.Query;
 import org.greenrobot.greendao.query.QueryBuilder;
 
-import com.cn.luo.helper.distribution.model.entity.FolderAndSuffix;
-import com.cn.luo.helper.distribution.model.entity.PlanAndFolder;
+import com.cn.luo.helper.distribution.model.entity.Plan;
 
 import com.cn.luo.helper.distribution.model.entity.Folder;
 
@@ -32,12 +33,12 @@ public class FolderDao extends AbstractDao<Folder, Long> {
     public static class Properties {
         public final static Property Id = new Property(0, Long.class, "id", true, "id");
         public final static Property Path = new Property(1, String.class, "path", false, "path");
+        public final static Property PlanId = new Property(2, Long.class, "planId", false, "plan_id");
     }
 
     private DaoSession daoSession;
 
     private Query<Folder> plan_FolderListQuery;
-    private Query<Folder> suffix_FolderListQuery;
 
     public FolderDao(DaoConfig config) {
         super(config);
@@ -53,7 +54,8 @@ public class FolderDao extends AbstractDao<Folder, Long> {
         String constraint = ifNotExists? "IF NOT EXISTS ": "";
         db.execSQL("CREATE TABLE " + constraint + "\"folder\" (" + //
                 "\"id\" INTEGER PRIMARY KEY ," + // 0: id
-                "\"path\" TEXT NOT NULL UNIQUE );"); // 1: path
+                "\"path\" TEXT NOT NULL UNIQUE ," + // 1: path
+                "\"plan_id\" INTEGER);"); // 2: planId
     }
 
     /** Drops the underlying database table. */
@@ -71,6 +73,11 @@ public class FolderDao extends AbstractDao<Folder, Long> {
             stmt.bindLong(1, id);
         }
         stmt.bindString(2, entity.getPath());
+ 
+        Long planId = entity.getPlanId();
+        if (planId != null) {
+            stmt.bindLong(3, planId);
+        }
     }
 
     @Override
@@ -82,6 +89,11 @@ public class FolderDao extends AbstractDao<Folder, Long> {
             stmt.bindLong(1, id);
         }
         stmt.bindString(2, entity.getPath());
+ 
+        Long planId = entity.getPlanId();
+        if (planId != null) {
+            stmt.bindLong(3, planId);
+        }
     }
 
     @Override
@@ -99,7 +111,8 @@ public class FolderDao extends AbstractDao<Folder, Long> {
     public Folder readEntity(Cursor cursor, int offset) {
         Folder entity = new Folder( //
             cursor.isNull(offset + 0) ? null : cursor.getLong(offset + 0), // id
-            cursor.getString(offset + 1) // path
+            cursor.getString(offset + 1), // path
+            cursor.isNull(offset + 2) ? null : cursor.getLong(offset + 2) // planId
         );
         return entity;
     }
@@ -108,6 +121,7 @@ public class FolderDao extends AbstractDao<Folder, Long> {
     public void readEntity(Cursor cursor, Folder entity, int offset) {
         entity.setId(cursor.isNull(offset + 0) ? null : cursor.getLong(offset + 0));
         entity.setPath(cursor.getString(offset + 1));
+        entity.setPlanId(cursor.isNull(offset + 2) ? null : cursor.getLong(offset + 2));
      }
     
     @Override
@@ -136,12 +150,11 @@ public class FolderDao extends AbstractDao<Folder, Long> {
     }
     
     /** Internal query to resolve the "folderList" to-many relationship of Plan. */
-    public List<Folder> _queryPlan_FolderList(long planId) {
+    public List<Folder> _queryPlan_FolderList(Long planId) {
         synchronized (this) {
             if (plan_FolderListQuery == null) {
                 QueryBuilder<Folder> queryBuilder = queryBuilder();
-                queryBuilder.join(PlanAndFolder.class, PlanAndFolderDao.Properties.FolderId)
-                    .where(PlanAndFolderDao.Properties.PlanId.eq(planId));
+                queryBuilder.where(Properties.PlanId.eq(null));
                 plan_FolderListQuery = queryBuilder.build();
             }
         }
@@ -150,19 +163,95 @@ public class FolderDao extends AbstractDao<Folder, Long> {
         return query.list();
     }
 
-    /** Internal query to resolve the "folderList" to-many relationship of Suffix. */
-    public List<Folder> _querySuffix_FolderList(long suffixId) {
-        synchronized (this) {
-            if (suffix_FolderListQuery == null) {
-                QueryBuilder<Folder> queryBuilder = queryBuilder();
-                queryBuilder.join(FolderAndSuffix.class, FolderAndSuffixDao.Properties.FolderId)
-                    .where(FolderAndSuffixDao.Properties.SuffixId.eq(suffixId));
-                suffix_FolderListQuery = queryBuilder.build();
-            }
+    private String selectDeep;
+
+    protected String getSelectDeep() {
+        if (selectDeep == null) {
+            StringBuilder builder = new StringBuilder("SELECT ");
+            SqlUtils.appendColumns(builder, "T", getAllColumns());
+            builder.append(',');
+            SqlUtils.appendColumns(builder, "T0", daoSession.getPlanDao().getAllColumns());
+            builder.append(" FROM folder T");
+            builder.append(" LEFT JOIN plan T0 ON T.\"plan_id\"=T0.\"id\"");
+            builder.append(' ');
+            selectDeep = builder.toString();
         }
-        Query<Folder> query = suffix_FolderListQuery.forCurrentThread();
-        query.setParameter(0, suffixId);
-        return query.list();
+        return selectDeep;
+    }
+    
+    protected Folder loadCurrentDeep(Cursor cursor, boolean lock) {
+        Folder entity = loadCurrent(cursor, 0, lock);
+        int offset = getAllColumns().length;
+
+        Plan plan = loadCurrentOther(daoSession.getPlanDao(), cursor, offset);
+        entity.setPlan(plan);
+
+        return entity;    
     }
 
+    public Folder loadDeep(Long key) {
+        assertSinglePk();
+        if (key == null) {
+            return null;
+        }
+
+        StringBuilder builder = new StringBuilder(getSelectDeep());
+        builder.append("WHERE ");
+        SqlUtils.appendColumnsEqValue(builder, "T", getPkColumns());
+        String sql = builder.toString();
+        
+        String[] keyArray = new String[] { key.toString() };
+        Cursor cursor = db.rawQuery(sql, keyArray);
+        
+        try {
+            boolean available = cursor.moveToFirst();
+            if (!available) {
+                return null;
+            } else if (!cursor.isLast()) {
+                throw new IllegalStateException("Expected unique result, but count was " + cursor.getCount());
+            }
+            return loadCurrentDeep(cursor, true);
+        } finally {
+            cursor.close();
+        }
+    }
+    
+    /** Reads all available rows from the given cursor and returns a list of new ImageTO objects. */
+    public List<Folder> loadAllDeepFromCursor(Cursor cursor) {
+        int count = cursor.getCount();
+        List<Folder> list = new ArrayList<Folder>(count);
+        
+        if (cursor.moveToFirst()) {
+            if (identityScope != null) {
+                identityScope.lock();
+                identityScope.reserveRoom(count);
+            }
+            try {
+                do {
+                    list.add(loadCurrentDeep(cursor, false));
+                } while (cursor.moveToNext());
+            } finally {
+                if (identityScope != null) {
+                    identityScope.unlock();
+                }
+            }
+        }
+        return list;
+    }
+    
+    protected List<Folder> loadDeepAllAndCloseCursor(Cursor cursor) {
+        try {
+            return loadAllDeepFromCursor(cursor);
+        } finally {
+            cursor.close();
+        }
+    }
+    
+
+    /** A raw-style query where you can pass any WHERE clause and arguments. */
+    public List<Folder> queryDeep(String where, String... selectionArg) {
+        Cursor cursor = db.rawQuery(getSelectDeep() + where, selectionArg);
+        return loadDeepAllAndCloseCursor(cursor);
+    }
+ 
 }

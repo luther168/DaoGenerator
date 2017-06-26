@@ -25,9 +25,6 @@ public class DaoMaster extends AbstractDaoMaster {
         FolderDao.createTable(db, ifNotExists);
         SuffixDao.createTable(db, ifNotExists);
         CategoryDao.createTable(db, ifNotExists);
-        PlanAndFolderDao.createTable(db, ifNotExists);
-        FolderAndSuffixDao.createTable(db, ifNotExists);
-        PlanAndSuffixDao.createTable(db, ifNotExists);
     }
 
     /** Drops underlying database table using DAOs. */
@@ -36,9 +33,6 @@ public class DaoMaster extends AbstractDaoMaster {
         FolderDao.dropTable(db, ifExists);
         SuffixDao.dropTable(db, ifExists);
         CategoryDao.dropTable(db, ifExists);
-        PlanAndFolderDao.dropTable(db, ifExists);
-        FolderAndSuffixDao.dropTable(db, ifExists);
-        PlanAndSuffixDao.dropTable(db, ifExists);
     }
 
     /**
@@ -61,9 +55,6 @@ public class DaoMaster extends AbstractDaoMaster {
         registerDaoClass(FolderDao.class);
         registerDaoClass(SuffixDao.class);
         registerDaoClass(CategoryDao.class);
-        registerDaoClass(PlanAndFolderDao.class);
-        registerDaoClass(FolderAndSuffixDao.class);
-        registerDaoClass(PlanAndSuffixDao.class);
     }
 
     public DaoSession newSession() {

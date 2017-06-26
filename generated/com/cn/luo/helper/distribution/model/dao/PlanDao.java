@@ -1,6 +1,5 @@
 package com.cn.luo.helper.distribution.model.dao;
 
-import java.util.List;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteStatement;
 
@@ -9,11 +8,6 @@ import org.greenrobot.greendao.Property;
 import org.greenrobot.greendao.internal.DaoConfig;
 import org.greenrobot.greendao.database.Database;
 import org.greenrobot.greendao.database.DatabaseStatement;
-import org.greenrobot.greendao.query.Query;
-import org.greenrobot.greendao.query.QueryBuilder;
-
-import com.cn.luo.helper.distribution.model.entity.PlanAndFolder;
-import com.cn.luo.helper.distribution.model.entity.PlanAndSuffix;
 
 import com.cn.luo.helper.distribution.model.entity.Plan;
 
@@ -36,8 +30,6 @@ public class PlanDao extends AbstractDao<Plan, Long> {
 
     private DaoSession daoSession;
 
-    private Query<Plan> folder_PlanListQuery;
-    private Query<Plan> suffix_PlanListQuery;
 
     public PlanDao(DaoConfig config) {
         super(config);
@@ -135,34 +127,4 @@ public class PlanDao extends AbstractDao<Plan, Long> {
         return true;
     }
     
-    /** Internal query to resolve the "planList" to-many relationship of Folder. */
-    public List<Plan> _queryFolder_PlanList(long folderId) {
-        synchronized (this) {
-            if (folder_PlanListQuery == null) {
-                QueryBuilder<Plan> queryBuilder = queryBuilder();
-                queryBuilder.join(PlanAndFolder.class, PlanAndFolderDao.Properties.PlanId)
-                    .where(PlanAndFolderDao.Properties.FolderId.eq(folderId));
-                folder_PlanListQuery = queryBuilder.build();
-            }
-        }
-        Query<Plan> query = folder_PlanListQuery.forCurrentThread();
-        query.setParameter(0, folderId);
-        return query.list();
-    }
-
-    /** Internal query to resolve the "planList" to-many relationship of Suffix. */
-    public List<Plan> _querySuffix_PlanList(long suffixId) {
-        synchronized (this) {
-            if (suffix_PlanListQuery == null) {
-                QueryBuilder<Plan> queryBuilder = queryBuilder();
-                queryBuilder.join(PlanAndSuffix.class, PlanAndSuffixDao.Properties.PlanId)
-                    .where(PlanAndSuffixDao.Properties.SuffixId.eq(suffixId));
-                suffix_PlanListQuery = queryBuilder.build();
-            }
-        }
-        Query<Plan> query = suffix_PlanListQuery.forCurrentThread();
-        query.setParameter(0, suffixId);
-        return query.list();
-    }
-
 }

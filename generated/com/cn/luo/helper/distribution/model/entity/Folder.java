@@ -27,6 +27,9 @@ public class Folder {
     @Unique
     private String path;
 
+    @Property(nameInDb = "plan_id")
+    private Long planId;
+
     /** Used to resolve relations */
     @Generated
     private transient DaoSession daoSession;
@@ -35,12 +38,15 @@ public class Folder {
     @Generated
     private transient FolderDao myDao;
 
-    @ToMany
-    @JoinEntity(entity = PlanAndFolder.class, sourceProperty = "folderId", targetProperty = "planId")
-    private List<Plan> planList;
+    @ToOne(joinProperty = "planId")
+    private Plan plan;
 
-    @ToMany
-    @JoinEntity(entity = FolderAndSuffix.class, sourceProperty = "folderId", targetProperty = "suffixId")
+    @Generated
+    private transient Long plan__resolvedKey;
+
+    @ToMany(joinProperties = {
+        @JoinProperty(name = "id", referencedName = "folderId")
+    })
     private List<Suffix> suffixList;
 
     @Generated
@@ -52,9 +58,10 @@ public class Folder {
     }
 
     @Generated
-    public Folder(Long id, String path) {
+    public Folder(Long id, String path, Long planId) {
         this.id = id;
         this.path = path;
+        this.planId = planId;
     }
 
     /** called by internal mechanisms, do not call yourself. */
@@ -82,26 +89,37 @@ public class Folder {
         this.path = path;
     }
 
-    /** To-many relationship, resolved on first access (and after reset). Changes to to-many relations are not persisted, make changes to the target entity. */
-    @Generated
-    public List<Plan> getPlanList() {
-        if (planList == null) {
-            __throwIfDetached();
-            PlanDao targetDao = daoSession.getPlanDao();
-            List<Plan> planListNew = targetDao._queryFolder_PlanList(id);
-            synchronized (this) {
-                if(planList == null) {
-                    planList = planListNew;
-                }
-            }
-        }
-        return planList;
+    public Long getPlanId() {
+        return planId;
     }
 
-    /** Resets a to-many relationship, making the next get call to query for a fresh result. */
+    public void setPlanId(Long planId) {
+        this.planId = planId;
+    }
+
+    /** To-one relationship, resolved on first access. */
     @Generated
-    public synchronized void resetPlanList() {
-        planList = null;
+    public Plan getPlan() {
+        Long __key = this.planId;
+        if (plan__resolvedKey == null || !plan__resolvedKey.equals(__key)) {
+            __throwIfDetached();
+            PlanDao targetDao = daoSession.getPlanDao();
+            Plan planNew = targetDao.load(__key);
+            synchronized (this) {
+                plan = planNew;
+            	plan__resolvedKey = __key;
+            }
+        }
+        return plan;
+    }
+
+    @Generated
+    public void setPlan(Plan plan) {
+        synchronized (this) {
+            this.plan = plan;
+            planId = plan == null ? null : plan.getId();
+            plan__resolvedKey = planId;
+        }
     }
 
     /** To-many relationship, resolved on first access (and after reset). Changes to to-many relations are not persisted, make changes to the target entity. */

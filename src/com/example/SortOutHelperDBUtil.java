@@ -36,31 +36,39 @@ public class SortOutHelperDBUtil {
 
         //建立表之间的关联
         //建立多对多关系
-        Entity planAndFolder = schema.addEntity("PlanAndFolder");
-        planAndFolder.setDbName("plan_and_folder");
-        planAndFolder.addIdProperty().dbName(Constant.DB_NAME_ID);
-        Property planId = planAndFolder.addLongProperty("planId").dbName("plan_id").notNull().getProperty();
-        Property folderId = planAndFolder.addLongProperty("folderId").dbName("folder_id").notNull().getProperty();
-        plan.addToMany(folder, planAndFolder, planId, folderId);
-        folder.addToMany(plan, planAndFolder, folderId, planId);
+//        Entity planAndFolder = schema.addEntity("PlanAndFolder");
+//        planAndFolder.setDbName("plan_and_folder");
+//        planAndFolder.addIdProperty().dbName(Constant.DB_NAME_ID);
+//        Property planId = planAndFolder.addLongProperty("planId").dbName("plan_id").notNull().getProperty();
+//        Property folderId = planAndFolder.addLongProperty("folderId").dbName("folder_id").notNull().getProperty();
+//        plan.addToMany(folder, planAndFolder, planId, folderId);
+//        folder.addToMany(plan, planAndFolder, folderId, planId);
 
-        Entity folderAndSuffix = schema.addEntity("FolderAndSuffix");
-        folderAndSuffix.setDbName("folder_and_suffix");
-        folderAndSuffix.addIdProperty().dbName(Constant.DB_NAME_ID);
-        Property folderId1 = folderAndSuffix.addLongProperty("folderId").dbName("folder_id").notNull().getProperty();
-        Property suffixId = folderAndSuffix.addLongProperty("suffixId").dbName("suffix_id").notNull().getProperty();
-        suffix.addToMany(folder, folderAndSuffix, suffixId, folderId1);
-        folder.addToMany(suffix, folderAndSuffix, folderId1, suffixId);
+//        Entity folderAndSuffix = schema.addEntity("FolderAndSuffix");
+//        folderAndSuffix.setDbName("folder_and_suffix");
+//        folderAndSuffix.addIdProperty().dbName(Constant.DB_NAME_ID);
+//        Property folderId1 = folderAndSuffix.addLongProperty("folderId").dbName("folder_id").notNull().getProperty();
+//        Property suffixId = folderAndSuffix.addLongProperty("suffixId").dbName("suffix_id").notNull().getProperty();
+//        suffix.addToMany(folder, folderAndSuffix, suffixId, folderId1);
+//        folder.addToMany(suffix, folderAndSuffix, folderId1, suffixId);
 
-        Entity planAndSuffix = schema.addEntity("PlanAndSuffix");
-        planAndSuffix.setDbName("plan_and_suffix");
-        planAndSuffix.addIdProperty().dbName(Constant.DB_NAME_ID);
-        Property planId1 = planAndSuffix.addLongProperty("planId").dbName("plan_id").notNull().getProperty();
-        Property suffixId1 = planAndSuffix.addLongProperty("suffixId").dbName("suffix_id").notNull().getProperty();
-        plan.addToMany(suffix, planAndSuffix, planId1, suffixId1);
-        suffix.addToMany(plan, planAndSuffix, suffixId1, planId1);
+//        Entity planAndSuffix = schema.addEntity("PlanAndSuffix");
+//        planAndSuffix.setDbName("plan_and_suffix");
+//        planAndSuffix.addIdProperty().dbName(Constant.DB_NAME_ID);
+//        Property planId1 = planAndSuffix.addLongProperty("planId").dbName("plan_id").notNull().getProperty();
+//        Property suffixId1 = planAndSuffix.addLongProperty("suffixId").dbName("suffix_id").notNull().getProperty();
+//        plan.addToMany(suffix, planAndSuffix, planId1, suffixId1);
+//        suffix.addToMany(plan, planAndSuffix, suffixId1, planId1);
 
         //一对多关系
+        Property planId = folder.addLongProperty("planId").dbName("plan_id").getProperty();
+        folder.addToOne(plan,planId).setName("plan");
+        plan.addToMany(folder, planId).setName("folderList");
+
+        Property folderId = suffix.addLongProperty("folderId").dbName("folder_id").getProperty();
+        suffix.addToOne(folder, folderId).setName("folder");
+        folder.addToMany(suffix, folderId).setName("suffixList");
+
         Property categoryId = suffix.addLongProperty("categoryId").dbName("category_id").getProperty();
         suffix.addToOne(category, categoryId).setName("category");
         category.addToMany(suffix, categoryId).setName("suffixList");
