@@ -57,7 +57,7 @@ public class SuffixDao extends AbstractDao<Suffix, Long> {
         String constraint = ifNotExists? "IF NOT EXISTS ": "";
         db.execSQL("CREATE TABLE " + constraint + "\"suffix\" (" + //
                 "\"id\" INTEGER PRIMARY KEY ," + // 0: id
-                "\"name\" TEXT NOT NULL UNIQUE ," + // 1: name
+                "\"name\" TEXT NOT NULL ," + // 1: name
                 "\"folder_id\" INTEGER," + // 2: folderId
                 "\"category_id\" INTEGER);"); // 3: categoryId
     }

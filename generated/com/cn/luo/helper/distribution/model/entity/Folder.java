@@ -24,7 +24,6 @@ public class Folder {
 
     @Property(nameInDb = "path")
     @NotNull
-    @Unique
     private String path;
 
     @Property(nameInDb = "plan_id")

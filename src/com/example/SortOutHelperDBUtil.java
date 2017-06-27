@@ -20,13 +20,13 @@ public class SortOutHelperDBUtil {
         Entity folder = schema.addEntity("Folder");
         folder.setDbName("folder");
         folder.addIdProperty().dbName(Constant.DB_NAME_ID);
-        folder.addStringProperty("path").dbName("path").notNull().unique();
+        folder.addStringProperty("path").dbName("path").notNull();
 
         //文件后缀表
         Entity suffix = schema.addEntity("Suffix");
         suffix.setDbName("suffix");
         suffix.addIdProperty().dbName(Constant.DB_NAME_ID);
-        suffix.addStringProperty("name").dbName(Constant.DB_NAME_NAME).notNull().unique();
+        suffix.addStringProperty("name").dbName(Constant.DB_NAME_NAME).notNull();
 
         //分类表
         Entity category = schema.addEntity("Category");

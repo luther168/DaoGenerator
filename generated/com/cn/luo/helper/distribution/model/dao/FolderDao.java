@@ -54,7 +54,7 @@ public class FolderDao extends AbstractDao<Folder, Long> {
         String constraint = ifNotExists? "IF NOT EXISTS ": "";
         db.execSQL("CREATE TABLE " + constraint + "\"folder\" (" + //
                 "\"id\" INTEGER PRIMARY KEY ," + // 0: id
-                "\"path\" TEXT NOT NULL UNIQUE ," + // 1: path
+                "\"path\" TEXT NOT NULL ," + // 1: path
                 "\"plan_id\" INTEGER);"); // 2: planId
     }
 

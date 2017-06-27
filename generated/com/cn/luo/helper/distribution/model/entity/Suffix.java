@@ -23,7 +23,6 @@ public class Suffix {
 
     @Property(nameInDb = "name")
     @NotNull
-    @Unique
     private String name;
 
     @Property(nameInDb = "folder_id")
