@@ -4,12 +4,9 @@ import org.greenrobot.greendao.generator.Entity;
 import org.greenrobot.greendao.generator.Property;
 import org.greenrobot.greendao.generator.Schema;
 
-/**
- * Created by Luther on 2017/5/24.
- */
-public class SortOutHelperDBUtil {
+class DistributionHelperDBUtil {
 
-    public static void generateSortOutHelperDB(Schema schema) {
+    static void generateDistributionHelperDB(Schema schema) {
         //分配方案表
         Entity plan = schema.addEntity("Plan");
         plan.setDbName("plan");
