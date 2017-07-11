@@ -32,7 +32,8 @@ public class NoteDao extends AbstractDao<Note, Long> {
         public final static Property Id = new Property(0, Long.class, "id", true, "id");
         public final static Property Title = new Property(1, String.class, "title", false, "title");
         public final static Property Content = new Property(2, String.class, "content", false, "content");
-        public final static Property Create_time = new Property(3, java.util.Date.class, "create_time", false, "create_time");
+        public final static Property CreatedTime = new Property(3, java.util.Date.class, "createdTime", false, "created_time");
+        public final static Property ModifiedTime = new Property(4, java.util.Date.class, "modifiedTime", false, "modified_time");
     }
 
     private DaoSession daoSession;
@@ -53,9 +54,10 @@ public class NoteDao extends AbstractDao<Note, Long> {
         String constraint = ifNotExists? "IF NOT EXISTS ": "";
         db.execSQL("CREATE TABLE " + constraint + "\"note\" (" + //
                 "\"id\" INTEGER PRIMARY KEY ," + // 0: id
-                "\"title\" TEXT NOT NULL ," + // 1: title
+                "\"title\" TEXT NOT NULL UNIQUE ," + // 1: title
                 "\"content\" TEXT NOT NULL ," + // 2: content
-                "\"create_time\" INTEGER NOT NULL );"); // 3: create_time
+                "\"created_time\" INTEGER NOT NULL ," + // 3: createdTime
+                "\"modified_time\" INTEGER NOT NULL );"); // 4: modifiedTime
     }
 
     /** Drops the underlying database table. */
@@ -74,7 +76,8 @@ public class NoteDao extends AbstractDao<Note, Long> {
         }
         stmt.bindString(2, entity.getTitle());
         stmt.bindString(3, entity.getContent());
-        stmt.bindLong(4, entity.getCreate_time().getTime());
+        stmt.bindLong(4, entity.getCreatedTime().getTime());
+        stmt.bindLong(5, entity.getModifiedTime().getTime());
     }
 
     @Override
@@ -87,7 +90,8 @@ public class NoteDao extends AbstractDao<Note, Long> {
         }
         stmt.bindString(2, entity.getTitle());
         stmt.bindString(3, entity.getContent());
-        stmt.bindLong(4, entity.getCreate_time().getTime());
+        stmt.bindLong(4, entity.getCreatedTime().getTime());
+        stmt.bindLong(5, entity.getModifiedTime().getTime());
     }
 
     @Override
@@ -107,7 +111,8 @@ public class NoteDao extends AbstractDao<Note, Long> {
             cursor.isNull(offset + 0) ? null : cursor.getLong(offset + 0), // id
             cursor.getString(offset + 1), // title
             cursor.getString(offset + 2), // content
-            new java.util.Date(cursor.getLong(offset + 3)) // create_time
+            new java.util.Date(cursor.getLong(offset + 3)), // createdTime
+            new java.util.Date(cursor.getLong(offset + 4)) // modifiedTime
         );
         return entity;
     }
@@ -117,7 +122,8 @@ public class NoteDao extends AbstractDao<Note, Long> {
         entity.setId(cursor.isNull(offset + 0) ? null : cursor.getLong(offset + 0));
         entity.setTitle(cursor.getString(offset + 1));
         entity.setContent(cursor.getString(offset + 2));
-        entity.setCreate_time(new java.util.Date(cursor.getLong(offset + 3)));
+        entity.setCreatedTime(new java.util.Date(cursor.getLong(offset + 3)));
+        entity.setModifiedTime(new java.util.Date(cursor.getLong(offset + 4)));
      }
     
     @Override

@@ -1,5 +1,6 @@
 package com.cn.luo;
 
+import com.cn.luo.db.util.DBUtil;
 import com.cn.luo.db.util.DistributionHelperDBUtil;
 import com.cn.luo.db.util.NoteHelperDBUtil;
 import org.greenrobot.greendao.generator.DaoGenerator;
@@ -9,28 +10,29 @@ public class MainGenerator {
 
     public static void main(String[] args) {
         String generatedDB = NoteHelperDBUtil.DATABASE_NAME;
-        String defaultJavaPackage = NoteHelperDBUtil.DEFAULT_JAVA_PACKAGE;
-        String defaultJavaPackageDao = NoteHelperDBUtil.DEFAULT_JAVA_PACKAGE_DAO;
-        Schema schema = new Schema(1, defaultJavaPackage);
+        DBUtil dbUtil = getDbUtil(generatedDB);
 
-        switch (generatedDB) {
-            case DistributionHelperDBUtil.DATABASE_NAME:
-                DistributionHelperDBUtil.generateDistributionHelperDB(schema);
-                break;
-            case NoteHelperDBUtil.DATABASE_NAME:
-                NoteHelperDBUtil.generateDistributionHelperDB(schema);
-                break;
-            default:
-                break;
-        }
+        if (dbUtil != null) {
+            Schema schema = new Schema(dbUtil.getVersion(), dbUtil.getDefaultJavaPackage());
 
-        schema.setDefaultJavaPackageDao(defaultJavaPackageDao);
-        try {
-            String dirPath = "generated";
-            new DaoGenerator().generateAll(schema, dirPath);
-        } catch (Exception e) {
-            e.printStackTrace();
+            dbUtil.generateDB(schema);
+            schema.setDefaultJavaPackageDao(dbUtil.getDefaultJavaPackageDao());
+            try {
+                new DaoGenerator().generateAll(schema, DBUtil.OUT_DIR);
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
         }
+    }
+
+    private static DBUtil getDbUtil(String generatedDB) {
+        DBUtil dbUtil = null;
+        if (generatedDB.equals(DistributionHelperDBUtil.DATABASE_NAME)) {
+            dbUtil = new DistributionHelperDBUtil();
+        } else if (generatedDB.equals(NoteHelperDBUtil.DATABASE_NAME)) {
+            dbUtil = new NoteHelperDBUtil();
+        }
+        return dbUtil;
     }
 
 }

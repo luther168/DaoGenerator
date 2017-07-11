@@ -51,7 +51,7 @@ public class TagDao extends AbstractDao<Tag, Long> {
         String constraint = ifNotExists? "IF NOT EXISTS ": "";
         db.execSQL("CREATE TABLE " + constraint + "\"tag\" (" + //
                 "\"id\" INTEGER PRIMARY KEY ," + // 0: id
-                "\"name\" TEXT NOT NULL );"); // 1: name
+                "\"name\" TEXT NOT NULL UNIQUE );"); // 1: name
     }
 
     /** Drops the underlying database table. */

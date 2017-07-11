@@ -20,5 +20,6 @@ public class PropertyName {
     public static final String CATEGORY = "category";
     public static final String TITLE = "title";
     public static final String CONTENT = "content";
-    public static final String CREATE_TIME = "create_time";
+    public static final String CREATE_TIME = "createdTime";
+    public static final String MODIFY_TIM = "modifiedTime";
 }

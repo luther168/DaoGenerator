@@ -23,15 +23,20 @@ public class Note {
 
     @Property(nameInDb = "title")
     @NotNull
+    @Unique
     private String title;
 
     @Property(nameInDb = "content")
     @NotNull
     private String content;
 
-    @Property(nameInDb = "create_time")
+    @Property(nameInDb = "created_time")
     @NotNull
-    private java.util.Date create_time;
+    private java.util.Date createdTime;
+
+    @Property(nameInDb = "modified_time")
+    @NotNull
+    private java.util.Date modifiedTime;
 
     /** Used to resolve relations */
     @Generated
@@ -54,11 +59,12 @@ public class Note {
     }
 
     @Generated
-    public Note(Long id, String title, String content, java.util.Date create_time) {
+    public Note(Long id, String title, String content, java.util.Date createdTime, java.util.Date modifiedTime) {
         this.id = id;
         this.title = title;
         this.content = content;
-        this.create_time = create_time;
+        this.createdTime = createdTime;
+        this.modifiedTime = modifiedTime;
     }
 
     /** called by internal mechanisms, do not call yourself. */
@@ -97,13 +103,23 @@ public class Note {
     }
 
     @NotNull
-    public java.util.Date getCreate_time() {
-        return create_time;
+    public java.util.Date getCreatedTime() {
+        return createdTime;
     }
 
     /** Not-null value; ensure this value is available before it is saved to the database. */
-    public void setCreate_time(@NotNull java.util.Date create_time) {
-        this.create_time = create_time;
+    public void setCreatedTime(@NotNull java.util.Date createdTime) {
+        this.createdTime = createdTime;
+    }
+
+    @NotNull
+    public java.util.Date getModifiedTime() {
+        return modifiedTime;
+    }
+
+    /** Not-null value; ensure this value is available before it is saved to the database. */
+    public void setModifiedTime(@NotNull java.util.Date modifiedTime) {
+        this.modifiedTime = modifiedTime;
     }
 
     /** To-many relationship, resolved on first access (and after reset). Changes to to-many relations are not persisted, make changes to the target entity. */

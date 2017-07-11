@@ -23,6 +23,7 @@ public class Tag {
 
     @Property(nameInDb = "name")
     @NotNull
+    @Unique
     private String name;
 
     /** Used to resolve relations */

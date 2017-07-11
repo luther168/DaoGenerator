@@ -6,13 +6,19 @@ import org.greenrobot.greendao.generator.Entity;
 import org.greenrobot.greendao.generator.Property;
 import org.greenrobot.greendao.generator.Schema;
 
-public class DistributionHelperDBUtil {
+public class DistributionHelperDBUtil extends DBUtil {
 
     public static final String DATABASE_NAME = "distribution_helper.db";
+    public static final int DATABASE_VERSION = 1;
     public static final String DEFAULT_JAVA_PACKAGE = "com.cn.luo.helper.distribution.model.entity";
     public static final String DEFAULT_JAVA_PACKAGE_DAO = "com.cn.luo.helper.distribution.model.dao";
 
-    public static void generateDistributionHelperDB(Schema schema) {
+    public DistributionHelperDBUtil() {
+        super(DATABASE_VERSION, DEFAULT_JAVA_PACKAGE, DEFAULT_JAVA_PACKAGE_DAO);
+    }
+
+    @Override
+    public void generateDB(Schema schema) {
         // Plan table
         Entity plan = schema.addEntity("Plan");
         plan.setDbName(DBName.PLAN);
