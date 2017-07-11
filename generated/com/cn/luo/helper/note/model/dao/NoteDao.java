@@ -1,5 +1,6 @@
 package com.cn.luo.helper.note.model.dao;
 
+import java.util.List;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteStatement;
 
@@ -8,6 +9,10 @@ import org.greenrobot.greendao.Property;
 import org.greenrobot.greendao.internal.DaoConfig;
 import org.greenrobot.greendao.database.Database;
 import org.greenrobot.greendao.database.DatabaseStatement;
+import org.greenrobot.greendao.query.Query;
+import org.greenrobot.greendao.query.QueryBuilder;
+
+import com.cn.luo.helper.note.model.entity.NoteAndTag;
 
 import com.cn.luo.helper.note.model.entity.Note;
 
@@ -30,6 +35,9 @@ public class NoteDao extends AbstractDao<Note, Long> {
         public final static Property Create_time = new Property(3, java.util.Date.class, "create_time", false, "create_time");
     }
 
+    private DaoSession daoSession;
+
+    private Query<Note> tag_NoteListQuery;
 
     public NoteDao(DaoConfig config) {
         super(config);
@@ -37,6 +45,7 @@ public class NoteDao extends AbstractDao<Note, Long> {
     
     public NoteDao(DaoConfig config, DaoSession daoSession) {
         super(config, daoSession);
+        this.daoSession = daoSession;
     }
 
     /** Creates the underlying database table. */
@@ -79,6 +88,12 @@ public class NoteDao extends AbstractDao<Note, Long> {
         stmt.bindString(2, entity.getTitle());
         stmt.bindString(3, entity.getContent());
         stmt.bindLong(4, entity.getCreate_time().getTime());
+    }
+
+    @Override
+    protected final void attachEntity(Note entity) {
+        super.attachEntity(entity);
+        entity.__setDaoSession(daoSession);
     }
 
     @Override
@@ -130,4 +145,19 @@ public class NoteDao extends AbstractDao<Note, Long> {
         return true;
     }
     
+    /** Internal query to resolve the "noteList" to-many relationship of Tag. */
+    public List<Note> _queryTag_NoteList(long tagId) {
+        synchronized (this) {
+            if (tag_NoteListQuery == null) {
+                QueryBuilder<Note> queryBuilder = queryBuilder();
+                queryBuilder.join(NoteAndTag.class, NoteAndTagDao.Properties.NoteId)
+                    .where(NoteAndTagDao.Properties.TagId.eq(tagId));
+                tag_NoteListQuery = queryBuilder.build();
+            }
+        }
+        Query<Note> query = tag_NoteListQuery.forCurrentThread();
+        query.setParameter(0, tagId);
+        return query.list();
+    }
+
 }

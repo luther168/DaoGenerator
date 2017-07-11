@@ -3,6 +3,7 @@ package com.cn.luo.db.util;
 import com.cn.luo.db.DBName;
 import com.cn.luo.db.PropertyName;
 import org.greenrobot.greendao.generator.Entity;
+import org.greenrobot.greendao.generator.Property;
 import org.greenrobot.greendao.generator.Schema;
 
 /**
@@ -32,5 +33,15 @@ public class NoteHelperDBUtil {
         tag.setDbName(DBName.TAG);
         tag.addIdProperty().dbName(DBName.ID);
         tag.addStringProperty(PropertyName.NAME).dbName(DBName.NAME).notNull();
+
+        // Build the relationship between tables
+        // Build the many-to-many relationship
+        Entity noteAndTag = schema.addEntity("NoteAndTag");
+        noteAndTag.setDbName("note_and_tag");
+        noteAndTag.addIdProperty().dbName(DBName.ID);
+        Property noteId = noteAndTag.addLongProperty("noteId").dbName("note_id").notNull().getProperty();
+        Property tagId = noteAndTag.addLongProperty("tagId").dbName("tag_id").notNull().getProperty();
+        note.addToMany(tag, noteAndTag, noteId, tagId);
+        tag.addToMany(note, noteAndTag, tagId, noteId);
     }
 }

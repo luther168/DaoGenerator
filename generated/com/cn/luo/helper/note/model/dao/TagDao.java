@@ -1,5 +1,6 @@
 package com.cn.luo.helper.note.model.dao;
 
+import java.util.List;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteStatement;
 
@@ -8,6 +9,10 @@ import org.greenrobot.greendao.Property;
 import org.greenrobot.greendao.internal.DaoConfig;
 import org.greenrobot.greendao.database.Database;
 import org.greenrobot.greendao.database.DatabaseStatement;
+import org.greenrobot.greendao.query.Query;
+import org.greenrobot.greendao.query.QueryBuilder;
+
+import com.cn.luo.helper.note.model.entity.NoteAndTag;
 
 import com.cn.luo.helper.note.model.entity.Tag;
 
@@ -28,6 +33,9 @@ public class TagDao extends AbstractDao<Tag, Long> {
         public final static Property Name = new Property(1, String.class, "name", false, "name");
     }
 
+    private DaoSession daoSession;
+
+    private Query<Tag> note_TagListQuery;
 
     public TagDao(DaoConfig config) {
         super(config);
@@ -35,6 +43,7 @@ public class TagDao extends AbstractDao<Tag, Long> {
     
     public TagDao(DaoConfig config, DaoSession daoSession) {
         super(config, daoSession);
+        this.daoSession = daoSession;
     }
 
     /** Creates the underlying database table. */
@@ -71,6 +80,12 @@ public class TagDao extends AbstractDao<Tag, Long> {
             stmt.bindLong(1, id);
         }
         stmt.bindString(2, entity.getName());
+    }
+
+    @Override
+    protected final void attachEntity(Tag entity) {
+        super.attachEntity(entity);
+        entity.__setDaoSession(daoSession);
     }
 
     @Override
@@ -118,4 +133,19 @@ public class TagDao extends AbstractDao<Tag, Long> {
         return true;
     }
     
+    /** Internal query to resolve the "tagList" to-many relationship of Note. */
+    public List<Tag> _queryNote_TagList(long noteId) {
+        synchronized (this) {
+            if (note_TagListQuery == null) {
+                QueryBuilder<Tag> queryBuilder = queryBuilder();
+                queryBuilder.join(NoteAndTag.class, NoteAndTagDao.Properties.TagId)
+                    .where(NoteAndTagDao.Properties.NoteId.eq(noteId));
+                note_TagListQuery = queryBuilder.build();
+            }
+        }
+        Query<Tag> query = note_TagListQuery.forCurrentThread();
+        query.setParameter(0, noteId);
+        return query.list();
+    }
+
 }
