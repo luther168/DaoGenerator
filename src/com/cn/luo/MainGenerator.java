@@ -9,7 +9,7 @@ import org.greenrobot.greendao.generator.Schema;
 public class MainGenerator {
 
     public static void main(String[] args) {
-        String generatedDB = DistributionHelperDBUtil.DATABASE_NAME;
+        String generatedDB = NoteHelperDBUtil.DATABASE_NAME;
         DBUtil dbUtil = getDbUtil(generatedDB);
 
         if (dbUtil != null) {

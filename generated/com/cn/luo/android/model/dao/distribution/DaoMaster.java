@@ -1,4 +1,4 @@
-package com.cn.luo.helper.distribution.model.dao.distribution;
+package com.cn.luo.android.model.dao.distribution;
 
 import android.content.Context;
 import android.database.sqlite.SQLiteDatabase;

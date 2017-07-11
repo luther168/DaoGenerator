@@ -10,8 +10,8 @@ public class DistributionHelperDBUtil extends DBUtil {
 
     public static final String DATABASE_NAME = "distribution_helper.db";
     public static final int DATABASE_VERSION = 1;
-    public static final String DEFAULT_JAVA_PACKAGE = "com.cn.luo.helper.distribution.model.entity.distribution";
-    public static final String DEFAULT_JAVA_PACKAGE_DAO = "com.cn.luo.helper.distribution.model.dao.distribution";
+    public static final String DEFAULT_JAVA_PACKAGE = "com.cn.luo.android.model.entity.distribution";
+    public static final String DEFAULT_JAVA_PACKAGE_DAO = "com.cn.luo.android.model.dao.distribution";
 
     public DistributionHelperDBUtil() {
         super(DATABASE_VERSION, DEFAULT_JAVA_PACKAGE, DEFAULT_JAVA_PACKAGE_DAO);
