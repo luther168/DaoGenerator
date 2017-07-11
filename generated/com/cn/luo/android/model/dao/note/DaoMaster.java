@@ -1,4 +1,4 @@
-package com.cn.luo.helper.note.model.dao;
+package com.cn.luo.android.model.dao.note;
 
 import android.content.Context;
 import android.database.sqlite.SQLiteDatabase;

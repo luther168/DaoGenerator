@@ -1,4 +1,4 @@
-package com.cn.luo.helper.note.model.entity;
+package com.cn.luo.android.model.entity.note;
 
 import org.greenrobot.greendao.annotation.*;
 
